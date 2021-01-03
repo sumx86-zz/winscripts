@@ -2,6 +2,8 @@
 'xinput     - http://download.game155.com/zip/xinput1_3.dll.zip
 'd3dx9_40   - http://download.game155.com/zip/d3dx9_40.dll.zip
 
+Option Explicit
+
 dim url: url = "http://download.game155.com/zip/"
 dim gameFolder: gameFolder = "C:\Program Files (x86)\Steam\steamapps\common\PAYDAY The Heist\"
 dim xhttp: set xhttp = CreateObject("Microsoft.XMLHTTP")
