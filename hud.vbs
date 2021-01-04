@@ -34,7 +34,7 @@ end if
 
 MsgBox count & " files extracted.", vbOKOnly + vbInformation, "Ready"
 
-function downloadFile(url, filepath)
+function downloadFile(ByVal url, ByVal filepath)
 	xhttp.Open "GET", url, False
 	xhttp.Send
 	if xhttp.Status = 200 then
@@ -49,7 +49,7 @@ function downloadFile(url, filepath)
 	downloadFile = xhttp.Status
 end function
 
-function Extract(archivepath, targetpath)
+function Extract(ByVal archivepath, ByVal targetpath)
 	dim oshell: set oshell = CreateObject("Shell.Application")
 	dim source, target
 
@@ -61,7 +61,7 @@ function Extract(archivepath, targetpath)
 	set source = Nothing
 end function
 
-function basename(filepath)
+function basename(ByVal filepath)
 	dim separator: separator = "/"
 	dim items: items = split(filepath, separator): basename = items(ubound(items))
 end function
