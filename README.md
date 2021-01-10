@@ -1,1 +1,3 @@
 # winscripts
+each folder here is a separate project
+s-arp has nothing to do with pdll.vbs or reg.vbs, etc...
