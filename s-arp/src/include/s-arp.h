@@ -14,6 +14,10 @@ typedef enum {
     NET_CREATE
 } NET_OPT;
 
+#ifndef ADDRESS_ETHERNET_LENGTH
+    #define ADDRESS_ETHERNET_LENGTH 6
+#endif
+
 static VOID quitp( const char *str );
 static DWORD init_net_table( VOID );
 static VOID set_net_entry( wArpEntry &wEntry, MIB_IPNETROW *table );
