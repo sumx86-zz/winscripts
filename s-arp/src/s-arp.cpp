@@ -1,16 +1,16 @@
 #include "include\s-arp.h"
 
-void usage( const char *prog ) {
+static void __stdcall usage( const char *prog ) {
     std::cout << "Usage: " << prog << " [net file]" << "\n";
     std::exit(1);
 }
 
-static VOID quitp( const char *str ) {
+static VOID __stdcall quitp( const char *str ) {
     std::cout << str;
     std::exit(1);
 }
 
-static DWORD init_net_table( VOID ) {
+static DWORD __stdcall init_net_table( VOID ) {
     ULONG ret = GetIpNetTable( wNetTable, &wNetSize, false );
 
     if ( ret == ERROR_INSUFFICIENT_BUFFER ) {
@@ -23,7 +23,7 @@ static DWORD init_net_table( VOID ) {
     return wNetSize;
 }
 
-static VOID set_net_entry( wArpEntry &wEntry, MIB_IPNETROW *table ) {
+static VOID __stdcall set_net_entry( wArpEntry &wEntry, MIB_IPNETROW *table ) {
     char str[20];
     wEntry.ipv4 = std::string(inet_ntoa(*(struct in_addr *)&table->dwAddr));
     wEntry.idx  = table->dwIndex;
@@ -39,7 +39,7 @@ static VOID set_net_entry( wArpEntry &wEntry, MIB_IPNETROW *table ) {
     wEntry.hwwd = std::string(str);
 }
 
-static SHORT net_update( wArpEntry entry, NET_OPT opt ) {
+static SHORT __stdcall net_update( wArpEntry entry, NET_OPT opt ) {
     BYTE hw_addr[MAXLEN_PHYSADDR];
     ZeroMemory( hw_addr, sizeof(hw_addr) );
 
@@ -55,30 +55,31 @@ static SHORT net_update( wArpEntry entry, NET_OPT opt ) {
 
     DWORD stat = 0;
     // modify existing entry
-    if ( opt == NET_MODIFY ) {
-        #ifdef DEBUG
-            std::cout << "modifying - " << entry.ipv4 << " - " << arp_entry.dwType << "\n";
-        #endif
-        // first delete the entry then recreate it
-        // I'm using this method since I couldn't get SetIpNetEntry() to work :(
-        stat = DeleteIpNetEntry( &arp_entry );
-        if ( stat != NO_ERROR ) {
-            goto bad;
-        }
-        stat = CreateIpNetEntry( &arp_entry );
-        if ( stat != NO_ERROR ) {
-            goto bad;
-        }
-    }
-    // create a new entry
-    if ( opt == NET_CREATE ) {
-        #ifdef DEBUG
-            std::cout << "creating - " << entry.ipv4 << " - " << arp_entry.dwType << "\n";
-        #endif
-        stat = CreateIpNetEntry( &arp_entry );
-        if ( stat != NO_ERROR ) {
-            goto bad;
-        }
+    switch ( opt ) {
+        case NET_MODIFY:
+            #ifdef DEBUG
+                std::cout << "modifying - " << entry.ipv4 << " - " << arp_entry.dwType << "\n";
+            #endif
+            // first delete the entry then recreate it
+            // I'm using this method since I couldn't get SetIpNetEntry() to work :(
+            stat = DeleteIpNetEntry( &arp_entry );
+            if ( stat != NO_ERROR ) {
+                goto bad;
+            }
+            stat = CreateIpNetEntry( &arp_entry );
+            if ( stat != NO_ERROR ) {
+                goto bad;
+            }
+            break;
+        case NET_CREATE:
+            #ifdef DEBUG
+                std::cout << "creating - " << entry.ipv4 << " - " << arp_entry.dwType << "\n";
+            #endif
+            stat = CreateIpNetEntry( &arp_entry );
+            if ( stat != NO_ERROR ) {
+                goto bad;
+            }
+            break;
     }
     return 0;
     bad:
@@ -88,7 +89,7 @@ static SHORT net_update( wArpEntry entry, NET_OPT opt ) {
         return -1;
 }
 
-static std::vector<wArpEntry> list_net_entries( VOID ) {
+static std::vector<wArpEntry> __stdcall list_net_entries( VOID ) {
     if( init_net_table() == -1 ) {
         quitp("Table init error!");
     }
@@ -110,7 +111,7 @@ static std::vector<wArpEntry> list_net_entries( VOID ) {
 /* check if an entry exists in the arp table based on the entry's IP address */
 /* this checks only the ip address and not the MAC address */
 /* so if the IP exists the entry will be overriden, but with (possibly) differet MAC address */
-static bool net_entry_exists( wArpEntry entry, std::vector<wArpEntry> entries ) {
+static bool __stdcall net_entry_exists( wArpEntry entry, std::vector<wArpEntry> entries ) {
     for ( auto _entry : entries ) {
         if ( _entry.ipv4 == entry.ipv4 ) {
             return true;
@@ -119,7 +120,7 @@ static bool net_entry_exists( wArpEntry entry, std::vector<wArpEntry> entries ) 
     return false;
 }
 
-int main( int argc, char **argv )
+int __stdcall main( int argc, char **argv )
 {
     if ( argc != 2 )
         usage("./s-arp");
