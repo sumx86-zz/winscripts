@@ -40,16 +40,16 @@ static VOID set_net_entry( wArpEntry &wEntry, MIB_IPNETROW *table ) {
 }
 
 static SHORT net_update( wArpEntry entry, NET_OPT opt ) {
-    uint8_t hw[6];
-    ZeroMemory( hw, sizeof(hw) );
+    BYTE hw_addr[MAXLEN_PHYSADDR];
+    ZeroMemory( hw_addr, sizeof(hw_addr) );
 
-    if ( ether_aton( entry.hwwd.c_str(), hw ) < 0 )
+    if ( ether_aton( entry.hwwd.c_str(), hw_addr ) < 0 )
         return -1;
 
     MIB_IPNETROW arp_entry;
-    arp_entry.dwPhysAddrLen = 6;
-    memcpy( arp_entry.bPhysAddr, hw, sizeof(hw));
-    arp_entry.dwAddr = inet_addr( entry.ipv4.c_str() );
+    arp_entry.dwPhysAddrLen = ADDRESS_ETHERNET_LENGTH;
+    memcpy( arp_entry.bPhysAddr, hw_addr, sizeof(hw_addr));
+    arp_entry.dwAddr = (DWORD) inet_addr( entry.ipv4.c_str() );
     arp_entry.dwIndex = entry.idx;
     arp_entry.dwType = MIB_IPNET_TYPE_STATIC;
 
