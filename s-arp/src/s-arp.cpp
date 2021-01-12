@@ -15,9 +15,8 @@ static DWORD __stdcall init_net_table( VOID ) {
 
     if ( ret == ERROR_INSUFFICIENT_BUFFER ) {
         wNetTable = (PMIB_IPNETTABLE) malloc( wNetSize );
-        if( wNetTable == NULL ) {
+        if( wNetTable == NULL )
             return -1;
-        }
     }
     ZeroMemory( wNetTable, sizeof(wNetTable) );
     return wNetSize;
@@ -84,19 +83,20 @@ static SHORT __stdcall net_update( wArpEntry entry, NET_OPT opt ) {
     return 0;
     bad:
         #ifdef DEBUG
-            std::cout << "Error -> " << stat << "\n";
+            winstrerror(globalErr, sizeof(globalErr), stat);
+            std::cout << "Error -> [" << globalErr << "]" << "\n";
         #endif
         return -1;
 }
 
 static std::vector<wArpEntry> __stdcall list_net_entries( VOID ) {
-    if( init_net_table() == -1 ) {
-        quitp("Table init error!");
-    }
+    if( init_net_table() == -1 )
+        quitp("Table init error! [MALLOC()]");
+
     ULONG ret = GetIpNetTable( wNetTable, &wNetSize, false );
-    if ( ret != NO_ERROR ) {
+    if ( ret != NO_ERROR )
         return {};
-    }
+
     std::vector<wArpEntry> entries = {};
     wArpEntry wEntry;
     if ( wNetTable->dwNumEntries > 0 ) {
@@ -118,6 +118,21 @@ static bool __stdcall net_entry_exists( wArpEntry entry, std::vector<wArpEntry> 
         }
     }
     return false;
+}
+
+SHORT __stdcall winstrerror( char *err, size_t size, DWORD errcode ) {
+    DWORD errCode = (errcode > 0) ? errcode : GetLastError();
+    char *str;
+    if (!FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                        NULL,
+                        errCode,
+                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                        (LPTSTR) &str,
+                        0,
+                        NULL))
+        return -1;
+    memcpy( err, str, size ), LocalFree( str );
+    return 0;
 }
 
 int __stdcall main( int argc, char **argv )
