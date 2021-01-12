@@ -9,6 +9,9 @@
 PMIB_IPNETTABLE wNetTable = NULL;
 DWORD wNetSize = 0;
 
+// globally accessible error buffer
+char globalErr[0xff];
+
 typedef enum {
     NET_MODIFY = 0,
     NET_CREATE
