@@ -19,5 +19,6 @@ std::vector<std::string> str_split( std::string line, const char delim );
 bool is_xdigit( char c );
 short xdec( char c, short base );
 SHORT ether_aton( const char *str, uint8_t *hw );
+SHORT __stdcall winstrerror( char *err, size_t size, DWORD errcode );
 
 #endif
