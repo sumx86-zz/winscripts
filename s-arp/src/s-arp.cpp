@@ -5,8 +5,10 @@ static void __stdcall usage( const char *prog ) {
     std::exit(1);
 }
 
-static VOID __stdcall quitp( const char *str ) {
-    std::cout << str;
+static VOID __stdcall quitp( const char *str, LPVOID ptr ) {
+    std::cout << str << "\n";
+    if ( ptr != NULL )
+        HeapFree( GetProcessHeap(), 0, ptr );
     std::exit(1);
 }
 
@@ -14,7 +16,7 @@ static DWORD __stdcall init_net_table( VOID ) {
     ULONG ret = GetIpNetTable( wNetTable, &wNetSize, false );
 
     if ( ret == ERROR_INSUFFICIENT_BUFFER ) {
-        wNetTable = (PMIB_IPNETTABLE) malloc( wNetSize );
+        wNetTable = (PMIB_IPNETTABLE) HeapAlloc( GetProcessHeap(), 0, wNetSize );
         if( wNetTable == NULL )
             return -1;
     }
@@ -91,7 +93,7 @@ static SHORT __stdcall net_update( wArpEntry entry, NET_OPT opt ) {
 
 static std::vector<wArpEntry> __stdcall list_net_entries( VOID ) {
     if( init_net_table() == -1 )
-        quitp("Table init error! [MALLOC()]");
+        quitp("Table init error! [MALLOC()]", NULL);
 
     ULONG ret = GetIpNetTable( wNetTable, &wNetSize, false );
     if ( ret != NO_ERROR )
@@ -120,21 +122,6 @@ static bool __stdcall net_entry_exists( wArpEntry entry, std::vector<wArpEntry> 
     return false;
 }
 
-SHORT __stdcall winstrerror( char *err, size_t size, DWORD errcode ) {
-    DWORD errCode = (errcode > 0) ? errcode : GetLastError();
-    char *str;
-    if (!FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                        NULL,
-                        errCode,
-                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                        (LPTSTR) &str,
-                        0,
-                        NULL))
-        return -1;
-    memcpy( err, str, size ), LocalFree( str );
-    return 0;
-}
-
 int __stdcall main( int argc, char **argv )
 {
     if ( argc != 2 )
@@ -142,19 +129,17 @@ int __stdcall main( int argc, char **argv )
 
     std::vector<wArpEntry> entries = list_net_entries();
     if ( entries.empty() ) {
-        free(wNetTable);
-        quitp("No entries found in arp table!");
+        quitp("GetIpNetTable() error!", wNetTable);
     }
     std::vector<wArpEntry> f_entries = parse_net_file(std::string(argv[1]));
     if ( f_entries.empty() ) {
-        free(wNetTable);
-        quitp("No entries found in net file!");
+        quitp("No entries found in net file!", wNetTable);
     }
     for ( auto entry : f_entries ) {
         if ( net_update( entry, net_entry_exists( entry, entries ) ? NET_MODIFY : NET_CREATE ) < 0 ) {
-            quitp("Error updating arp table!");
+            quitp("Error updating arp table!", wNetTable);
         }
     }
-    free(wNetTable);
+    HeapFree(GetProcessHeap(), 0, wNetTable);
     return 0;
 }
