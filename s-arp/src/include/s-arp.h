@@ -9,7 +9,6 @@
 PMIB_IPNETTABLE wNetTable = NULL;
 DWORD wNetSize = 0;
 
-// globally accessible error buffer
 char globalErr[0xff];
 
 typedef enum {
@@ -21,7 +20,7 @@ typedef enum {
     #define ADDRESS_ETHERNET_LENGTH 6
 #endif
 
-static VOID quitp( const char *str );
+static VOID quitp( const char *str, LPVOID ptr );
 static DWORD init_net_table( VOID );
 static VOID set_net_entry( wArpEntry &wEntry, MIB_IPNETROW *table );
 static SHORT net_update( wArpEntry entry, NET_OPT opt );
