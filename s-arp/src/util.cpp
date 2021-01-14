@@ -80,3 +80,18 @@ SHORT ether_aton( const char *str, uint8_t *hw ) {
         ZeroMemory( hw, 6 ), i = 0;
         return -1;
 }
+
+SHORT __stdcall winstrerror( char *err, size_t size, DWORD errcode ) {
+    DWORD errCode = (errcode > 0) ? errcode : GetLastError();
+    char *str;
+    if (!FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                        NULL,
+                        errCode,
+                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                        (LPTSTR) &str,
+                        0,
+                        NULL))
+        return -1;
+    memcpy( err, str, size ), LocalFree( str );
+    return 0;
+}
