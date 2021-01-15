@@ -44,7 +44,7 @@ static SHORT __stdcall net_update( wArpEntry entry, NET_OPT opt ) {
     BYTE hw_addr[MAXLEN_PHYSADDR];
     ZeroMemory( hw_addr, sizeof(hw_addr) );
 
-    if ( ether_aton( entry.hwwd.c_str(), hw_addr ) < 0 )
+    if ( !SUCCEEDED( ether_aton( entry.hwwd.c_str(), hw_addr ) ) )
         return -1;
 
     MIB_IPNETROW arp_entry;
@@ -92,7 +92,7 @@ static SHORT __stdcall net_update( wArpEntry entry, NET_OPT opt ) {
 }
 
 static std::vector<wArpEntry> __stdcall list_net_entries( VOID ) {
-    if( init_net_table() == -1 )
+    if( !SUCCEEDED( init_net_table() ) )
         quitp("Table init error! [MALLOC()]", NULL);
 
     ULONG ret = GetIpNetTable( wNetTable, &wNetSize, false );
@@ -101,6 +101,7 @@ static std::vector<wArpEntry> __stdcall list_net_entries( VOID ) {
 
     std::vector<wArpEntry> entries = {};
     wArpEntry wEntry;
+    
     if ( wNetTable->dwNumEntries > 0 ) {
         for ( uint32_t i = 0 ; i < wNetTable->dwNumEntries ; i++ ) {
             set_net_entry( wEntry, &wNetTable->table[i] );
