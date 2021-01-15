@@ -1,3 +1,4 @@
+'Run this script after building the application!
 Option Explicit
 
 dim hkey: hkey = "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run\"
