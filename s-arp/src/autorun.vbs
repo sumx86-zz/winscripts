@@ -1,7 +1,7 @@
 'Run this script after building the application!
 Option Explicit
 
-dim hkey: hkey = "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run\"
+dim hkey: hkey = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run\"
 dim bdir: bdir = "\build\Debug\"
 dim exe: exe = "s-arp.exe"
 dim wsh: set wsh = CreateObject("WScript.Shell")
