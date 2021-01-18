@@ -11,8 +11,10 @@ if fso.FileExists(file) then
     dim lines: lines = ReadFile(file)
     dim line, matches
     dim content
+    
     dim re: set re = new RegExp
     re.Pattern = pattern
+    
     for each line in lines
         set matches = re.Execute(line)
         if matches.Count = 1 then                              'change this value here
