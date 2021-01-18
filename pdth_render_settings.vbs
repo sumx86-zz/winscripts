@@ -48,8 +48,7 @@ function WriteToFile(ByVal file, ByVal content)
 end function
 
 function AddLine(ByVal line, ByRef arr)
-    Redim Preserve arr(Ubound(arr) + 1)
-    arr(UBound(arr)) = line
+    Redim Preserve arr(Ubound(arr) + 1): arr(UBound(arr)) = line
 end function
 
 set wsh = Nothing
