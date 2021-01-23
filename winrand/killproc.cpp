@@ -1,6 +1,5 @@
 #include <iostream>
 #include <windows.h>
-#include <shlobj.h>
 #include <tlhelp32.h>
 
 DWORD __stdcall FindProcess( const char *name ) {
