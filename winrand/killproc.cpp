@@ -2,6 +2,8 @@
 #include <windows.h>
 #include <tlhelp32.h>
 
+#define ERROR_PROCESS_NOT_FOUND -2
+
 DWORD __stdcall FindProcess( const char *name ) {
     HANDLE hndl = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
     if( hndl == INVALID_HANDLE_VALUE )
@@ -20,8 +22,7 @@ DWORD __stdcall FindProcess( const char *name ) {
     while( Process32Next( hndl, &pe32 ) );
 
     CloseHandle(hndl);
-    std::cout << "[" << name << "] - No such process!\n";
-    return -1;
+    return ERROR_PROCESS_NOT_FOUND;
 }
 
 DWORD __stdcall KillProcess( DWORD pid ) {
@@ -54,9 +55,13 @@ SHORT __stdcall WinStrerror( char *err, size_t size, DWORD errcode ) {
 int main( int argc, char **argv ) {
     char err[0xff];
     DWORD pid = FindProcess("notepad.exe");
-    if( pid == -1 )
+    if( pid == -1 ) {
         goto error;
-
+    }
+    else if (pid == ERROR_PROCESS_NOT_FOUND) {
+        std::cout << "No such process!\n";
+        return -1;
+    }
     if( KillProcess( pid ) == -1 )
         goto error;
 
