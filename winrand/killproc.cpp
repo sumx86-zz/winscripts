@@ -2,6 +2,8 @@
 #include <windows.h>
 #include <tlhelp32.h>
 
+#define ISNULL(ptr) (((ptr) == NULL) || ((ptr) == nullptr))
+
 #define ERROR_PROCESS_NOT_FOUND -2
 
 DWORD __stdcall FindProcess( const char *name ) {
@@ -11,7 +13,8 @@ DWORD __stdcall FindProcess( const char *name ) {
 
     PROCESSENTRY32 pe32;
     bool ret = Process32First( hndl, &pe32 );
-    if( !ret )
+    
+    if ( !ret )
         return -1;
     do {
         if ( _stricmp( pe32.szExeFile, name ) == 0 ) {
@@ -25,16 +28,19 @@ DWORD __stdcall FindProcess( const char *name ) {
     return ERROR_PROCESS_NOT_FOUND;
 }
 
-DWORD __stdcall KillProcess( DWORD pid ) {
+bool __stdcall KillProcess( DWORD pid ) {
     HANDLE hndl = OpenProcess( PROCESS_TERMINATE , false, pid );
-    if ( hndl == NULL )
-        return -1;
+    if ( ISNULL(hndl) )
+        return false;
 
+    short is_killed = false;
     if ( TerminateProcess( hndl, 1 ) ) {
-        CloseHandle(hndl);
-        return 0;
+        is_killed = true;
+    } else {
+        std::cerr << "[ERROR] - Could't terminate process!\n";
     }
-    return -1;
+    CloseHandle(hndl);
+    return is_killed;
 }
 
 SHORT __stdcall WinStrerror( char *err, size_t size, DWORD errcode ) {
@@ -62,8 +68,8 @@ int main( int argc, char **argv ) {
         std::cout << "No such process!\n";
         return -1;
     }
-    if( KillProcess( pid ) == -1 )
-        goto error;
+    if( !KillProcess( pid ) )
+        return -1;
 
     return 0;
     error:
